@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Hour of Playtime</title>
+  
+  <!-- Web App Manifest & Mobile Icons -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hour of Playtime" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Main Loading Container -->
+    <main class="loading-wrapper">
+      
+      <!-- The Yellow Card Canvas with Red P and Flipping Shadow -->
+      <div class="logo-stage-container">
+        <canvas id="stageCanvas" width="600" height="600"></canvas>
+      </div>
+
+      <!-- Loading Info & Retro Details -->
+      <div class="loading-details">
+        <div class="status-box">
+          <span class="loading-text" id="statusText">LOADING PLAYTIME CO.</span>
+          <span class="dots" id="animatedDots">...</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-track">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <!-- Mobile Interaction Hint -->
+        <p class="tap-hint">Tap screen for Super Backflip ✦</p>
+      </div>
+
+      <!-- Top / Bottom Floating Mobile Controls -->
+      <header class="app-header">
+        <div class="brand-tag">HOUR OF PLAYTIME</div>
+        <div class="header-actions">
+          <button id="soundBtn" class="icon-btn" aria-label="Toggle Sound" title="Sound Effects">
+            <span id="soundIcon">🔊</span>
+          </button>
+          <button id="fullscreenBtn" class="icon-btn" aria-label="Fullscreen" title="Fullscreen">
+            ⛶
+          </button>
+          <button id="installBtn" class="install-pill-btn hidden">
+            📱 Install App
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats / Flip Counter -->
+      <footer class="app-footer">
+        <span id="flipCounter">Flips: 0</span>
+        <span class="version-tag">v0.1.0 • Alpha</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

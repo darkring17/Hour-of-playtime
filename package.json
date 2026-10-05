@@ -1,0 +1,18 @@
+{
+  "name": "hour-of-playtime",
+  "version": "0.1.0",
+  "description": "Hour of Playtime - Asymmetric Horror Fangame (Survivor vs Huggy Wuggy)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 3000"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5",
+    "vite": "^5.4.0"
+  }
+}
