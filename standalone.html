@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Hour of Playtime</title>
+  
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hour of Playtime" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000000;
+      touch-action: manipulation;
+      font-family: 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background-color: #000000;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Simple Center Install Button */
+    .install-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 40;
+    }
+
+    .simple-install-btn {
+      background: #EA2F3D;
+      color: #ffffff;
+      border: 3px solid #FDCD02;
+      font-family: 'Rubik', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 16px 36px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(234, 47, 61, 0.6), 0 8px 20px rgba(0, 0, 0, 0.8);
+      transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .simple-install-btn:active {
+      transform: scale(0.92);
+      background: #c81d2a;
+      box-shadow: 0 0 15px rgba(234, 47, 61, 0.8);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* iOS Modal Popup */
+    .ios-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .ios-modal-card {
+      background: #151518;
+      border: 2px solid #FDCD02;
+      border-radius: 24px;
+      padding: 24px 20px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    }
+
+    .ios-modal-title {
+      font-size: 18px;
+      color: #FDCD02;
+      margin-bottom: 14px;
+    }
+
+    .ios-modal-steps {
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #e0e0e0;
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    .ios-modal-steps strong {
+      color: #FDCD02;
+    }
+
+    .modal-close-btn {
+      background: #EA2F3D;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 24px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    /* Bottom-Right Backflipping P Loader */
+    .bottom-right-loader {
+      position: absolute;
+      bottom: env(safe-area-inset-bottom, 20px);
+      right: env(safe-area-inset-right, 20px);
+      z-index: 50;
+    }
+
+    .corner-p-box {
+      width: 88px;
+      height: 88px;
+      background-color: #FDCD02;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    .corner-p-box:active {
+      transform: scale(0.92);
+    }
+
+    #pCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @media (min-width: 600px) {
+      .corner-p-box {
+        width: 110px;
+        height: 110px;
+        border-radius: 22px;
+      }
+      .simple-install-btn {
+        font-size: 22px;
+        padding: 18px 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Simple Center Install Button -->
+    <div id="installContainer" class="install-container">
+      <button id="installBtn" class="simple-install-btn">
+        <span>📲 INSTALL</span>
+      </button>
+    </div>
+
+    <!-- iOS Step Modal -->
+    <div id="iosModal" class="ios-modal-backdrop hidden">
+      <div class="ios-modal-card">
+        <h3 class="ios-modal-title">To Install on iPhone:</h3>
+        <ol class="ios-modal-steps">
+          <li>Tap the <strong>Share</strong> icon <strong>􀈂</strong> at the bottom of Safari</li>
+          <li>Tap <strong>"Add to Home Screen" ➕</strong></li>
+          <li>Tap <strong>Add</strong> in the top right</li>
+        </ol>
+        <button id="closeModalBtn" class="modal-close-btn">GOT IT</button>
+      </div>
+    </div>
+
+    <!-- Bottom-Right Corner Backflipping P -->
+    <div class="bottom-right-loader">
+      <div class="corner-p-box" id="cornerBox">
+        <canvas id="pCanvas" width="240" height="240"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    class AudioController {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playJump() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(540, now + 0.16);
+
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      }
+
+      playWhoosh() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.linearRampToValueAtTime(200, now + 0.22);
+
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.24);
+        } catch (e) {}
+      }
+
+      playLand() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } catch (e) {}
+      }
+    }
+
+    const audio = new AudioController();
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // Install Handling
+    let deferredPrompt = null;
+    const installContainer = document.getElementById('installContainer');
+    const installBtn = document.getElementById('installBtn');
+    const iosModal = document.getElementById('iosModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function isInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    if (isInstalled()) {
+      installContainer.classList.add('hidden');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    installBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      audio.init();
+
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installContainer.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          iosModal.classList.remove('hidden');
+        } else {
+          // On Android / Desktop if prompt isn't fired yet
+          alert("To install: Tap your browser menu (⋮ or Share) and select 'Install App' or 'Add to Home Screen'!");
+        }
+      }
+    });
+
+    closeModalBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      iosModal.classList.add('hidden');
+    });
+
+    iosModal.addEventListener('click', (e) => {
+      if (e.target === iosModal) {
+        iosModal.classList.add('hidden');
+      }
+    });
+
+    // Canvas Animation
+    const canvas = document.getElementById('pCanvas');
+    const ctx = canvas.getContext('2d');
+    const STAGE_SIZE = 240;
+    canvas.width = STAGE_SIZE;
+    canvas.height = STAGE_SIZE;
+
+    function drawPShape(context) {
+      context.beginPath();
+      // Outer P
+      context.moveTo(-22, 60);
+      context.bezierCurveTo(-24, 24, -26, -12, -30, -32);
+      context.bezierCurveTo(-33, -50, -22, -74, 8, -74);
+      context.bezierCurveTo(38, -74, 46, -50, 46, -26);
+      context.bezierCurveTo(46, 2, 31, 15, -2, 15);
+      context.lineTo(0, 41);
+      context.bezierCurveTo(2, 50, 4, 60, 4, 60);
+      context.bezierCurveTo(-4, 61, -14, 61, -22, 60);
+      context.closePath();
+
+      // Inner cutout
+      context.moveTo(-9, -29);
+      context.bezierCurveTo(-9, -11, -3, -3, 10, -3);
+      context.bezierCurveTo(22, -3, 27, -11, 27, -29);
+      context.bezierCurveTo(27, -46, 22, -58, 10, -58);
+      context.bezierCurveTo(-3, -58, -9, -46, -9, -29);
+      context.closePath();
+
+      context.fillStyle = '#EA2F3D';
+      context.fill('evenodd');
+    }
+
+    const particles = [];
+    function spawnDust(x, y, count = 8, color = '#000000') {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 3 + 1;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1,
+          life: 1.0,
+          decay: Math.random() * 0.05 + 0.04,
+          size: Math.random() * 3 + 2,
+          color
+        });
+      }
+    }
+
+    const STATE_IDLE_SQUASH = 0;
+    const STATE_JUMP_UP = 1;
+    const STATE_BACKFLIP = 2;
+    const STATE_LAND_SQUASH = 3;
+
+    const pObject = {
+      holeX: 120,
+      holeY: 175,
+      holeRadiusX: 70,
+      holeRadiusY: 21,
+      x: 120,
+      y: 124,
+      baseRestY: 124,
+      vy: 0,
+      gravity: 0.65,
+      rotation: 0,
+      rotationSpeed: 0,
+      scaleX: 1,
+      scaleY: 1,
+      state: STATE_IDLE_SQUASH,
+      stateTimer: 0,
+      shadowScale: 1,
+      shadowAlpha: 0.85,
+      shadowRotation: 0,
+      isSuperFlip: false
+    };
+
+    function triggerFlip(isSuper = false) {
+      audio.init();
+      pObject.isSuperFlip = isSuper;
+      pObject.state = STATE_IDLE_SQUASH;
+      pObject.stateTimer = 0;
+    }
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#installBtn') || e.target.closest('#iosModal')) return;
+      audio.init();
+      if (navigator.vibrate) navigator.vibrate(30);
+
+      if (pObject.state === STATE_JUMP_UP || pObject.state === STATE_BACKFLIP) {
+        pObject.vy = -12;
+        pObject.rotationSpeed += 0.16;
+        audio.playWhoosh();
+        spawnDust(pObject.x, pObject.y, 8, '#EA2F3D');
+      } else {
+        triggerFlip(true);
+      }
+    });
+
+    let lastTime = performance.now();
+
+    function update(dt) {
+      const step = Math.min(dt / 16.666, 2.5);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * step;
+        p.y += p.vy * step;
+        p.vy += 0.1 * step;
+        p.life -= p.decay * step;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      switch (pObject.state) {
+        case STATE_IDLE_SQUASH: {
+          pObject.stateTimer += 0.08 * step;
+          const squash = Math.sin(pObject.stateTimer * Math.PI);
+          pObject.scaleX = 1 + squash * 0.3;
+          pObject.scaleY = 1 - squash * 0.3;
+          pObject.y = pObject.baseRestY + squash * 10;
+          pObject.rotation = 0;
+
+          if (pObject.stateTimer >= 1.0) {
+            pObject.state = STATE_JUMP_UP;
+            pObject.vy = pObject.isSuperFlip ? -17 : -14;
+            pObject.scaleX = 0.8;
+            pObject.scaleY = 1.25;
+            pObject.rotationSpeed = pObject.isSuperFlip ? 0.22 : 0.17;
+            audio.playJump();
+            spawnDust(pObject.holeX, pObject.holeY, 6, '#000000');
+          }
+          break;
+        }
+
+        case STATE_JUMP_UP:
+        case STATE_BACKFLIP: {
+          pObject.state = STATE_BACKFLIP;
+          pObject.vy += pObject.gravity * step;
+          pObject.y += pObject.vy * step;
+          pObject.rotation -= pObject.rotationSpeed * step;
+          pObject.scaleX += (1 - pObject.scaleX) * 0.08 * step;
+          pObject.scaleY += (1 - pObject.scaleY) * 0.08 * step;
+
+          if (Math.abs(pObject.vy) < 1.5 && Math.random() < 0.25) {
+            audio.playWhoosh();
+          }
+
+          if (pObject.y >= pObject.baseRestY && pObject.vy > 0) {
+            pObject.y = pObject.baseRestY;
+            pObject.vy = 0;
+            pObject.rotation = 0;
+            pObject.state = STATE_LAND_SQUASH;
+            pObject.stateTimer = 0;
+            pObject.scaleX = 1.35;
+            pObject.scaleY = 0.7;
+            audio.playLand();
+            if (navigator.vibrate) navigator.vibrate(20);
+            spawnDust(pObject.holeX, pObject.holeY, 8, '#000000');
+          }
+          break;
+        }
+
+        case STATE_LAND_SQUASH: {
+          pObject.stateTimer += 0.09 * step;
+          const damp = Math.exp(-pObject.stateTimer * 4);
+          const osc = Math.sin(pObject.stateTimer * 10);
+          pObject.scaleX = 1 + osc * damp * 0.35;
+          pObject.scaleY = 1 - osc * damp * 0.35;
+          pObject.y = pObject.baseRestY - (1 - pObject.scaleY) * 10;
+
+          if (pObject.stateTimer >= 1.2) {
+            pObject.scaleX = 1;
+            pObject.scaleY = 1;
+            pObject.state = STATE_IDLE_SQUASH;
+            pObject.stateTimer = 0;
+            pObject.isSuperFlip = false;
+          }
+          break;
+        }
+      }
+
+      const heightAboveHole = Math.max(0, pObject.baseRestY - pObject.y);
+      const heightNorm = Math.min(heightAboveHole / 120, 1.0);
+      pObject.shadowScale = Math.max(0.45, 1.0 - heightNorm * 0.55);
+      pObject.shadowAlpha = Math.max(0.3, 0.85 - heightNorm * 0.5);
+      pObject.shadowRotation = pObject.rotation * 0.8;
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, STAGE_SIZE, STAGE_SIZE);
+
+      // Yellow Background
+      ctx.fillStyle = '#FDCD02';
+      ctx.fillRect(0, 0, STAGE_SIZE, STAGE_SIZE);
+
+      // Black Hole
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(pObject.holeX, pObject.holeY, pObject.holeRadiusX, pObject.holeRadiusY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.restore();
+
+      // Dynamic Shadow
+      ctx.save();
+      ctx.translate(pObject.holeX, pObject.holeY);
+      ctx.rotate(pObject.shadowRotation);
+      ctx.scale(pObject.shadowScale, pObject.shadowScale * 0.45);
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 0, 0, ${pObject.shadowAlpha})`;
+      ctx.filter = 'blur(3px)';
+      ctx.fill();
+      ctx.filter = 'none';
+      ctx.restore();
+
+      // Particles
+      for (const p of particles) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Red 'P'
+      ctx.save();
+      ctx.translate(pObject.x, pObject.y);
+      ctx.rotate(pObject.rotation);
+      ctx.scale(pObject.scaleX, pObject.scaleY);
+
+      if (Math.abs(pObject.rotationSpeed) > 0.1 && pObject.state === STATE_BACKFLIP) {
+        ctx.save();
+        ctx.rotate(pObject.rotationSpeed * 0.25);
+        ctx.globalAlpha = 0.25;
+        drawPShape(ctx);
+        ctx.restore();
+      }
+
+      drawPShape(ctx);
+
+      // Gloss
+      ctx.beginPath();
+      ctx.arc(10, -29, 24, -Math.PI * 0.6, -Math.PI * 0.1);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Front lip of hole
+      if (pObject.y >= pObject.baseRestY - 4) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, pObject.holeY, STAGE_SIZE, STAGE_SIZE - pObject.holeY);
+        ctx.clip();
+        ctx.beginPath();
+        ctx.ellipse(pObject.holeX, pObject.holeY, pObject.holeRadiusX, pObject.holeRadiusY, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#050505';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function gameLoop(time) {
+      const dt = time - lastTime;
+      lastTime = time;
+      update(dt);
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    requestAnimationFrame((time) => {
+      lastTime = time;
+      gameLoop(time);
+    });
+  </script>
+</body>
+</html>
